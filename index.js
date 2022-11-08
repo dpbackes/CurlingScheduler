@@ -54,12 +54,15 @@ const createWeek = (playedMatches, allPossibleMatches, matchesPerWeek) => {
 
 const leagueSchedule = []
 
-console.log(matchUps)
-
 for(let i = 0; i < weeksNeeded; i++) {
     leagueSchedule.push(createWeek(leagueSchedule.flat(), matchUps, matchesPerWeek))
 }
 
-console.log(leagueSchedule.flat())
+const isScheduleComplete = matchUps.every(matchup => leagueSchedule.flat().some(scheduledMatchup => isSameMatch(matchup, scheduledMatchup)))
 
-console.log(matchUps.every(matchup => leagueSchedule.flat().some(scheduledMatchup => isSameMatch(matchup, scheduledMatchup))))
+if (!isScheduleComplete) {
+    console.log("Schedule is not complete! Not all round robin matchups have been scheduled!")
+    process.exit(1)
+}
+
+leagueSchedule.forEach((week, weekNumber) => console.log(`On week ${weekNumber + 1} the matchups are ${JSON.stringify(week)}`))
