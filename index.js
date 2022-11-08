@@ -1,4 +1,4 @@
-const numberOfTeams  = 9
+const numberOfTeams  = 13
 const numberOfSheets = 6
 
 const teamsArray = Array(numberOfTeams).fill().map((_, index) => index + 1) 
