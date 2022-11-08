@@ -26,23 +26,12 @@ const isSameMatch = (matchA, matchB) => matchA.teams.every(team => matchB.teams.
 const matchHasAnySameTeam = (matchA, matchB) => matchA.teams.some(team => matchB.teams.includes(team))
 const weekHasTeamPlaying = (week, match) => week.some(matchInWeek => matchHasAnySameTeam(match, matchInWeek))
 
-const arrayRotate = (array, count) => {
-    const result = array.slice(count, array.length).concat(array.slice(0, count))
-    debugger
-
-    return result
-}
+const arrayRotate = (array, count) => array.slice(count, array.length).concat(array.slice(0, count))
 
 // now, for every week, pick from the list of unplayed matches, making sure that we don't double book a team
 
 const createWeek = (playedMatches, allPossibleMatches, matchesPerWeek) => {
-    console.log(playedMatches)
     const availableMatchesThisWeek = allPossibleMatches.filter(match => !playedMatches.some(playedMatch => isSameMatch(match, playedMatch)))
-
-    //might have to actually iterate here
-    //const week = availableMatchesThisWeek.reduce((acc, thisMatch) => {
-    //    return !acc.includes(alreadyPlannedMatch => matchHasAnySameTeam(thisMatch, alreadyPlannedMatch)) ? acc.concat([thisMatch]) : acc
-    //}, [])
 
     const week = []
 
@@ -60,12 +49,6 @@ const createWeek = (playedMatches, allPossibleMatches, matchesPerWeek) => {
         week.push(candidateMatch)
     }
 
-    if (week.some(match => match === undefined)) {
-        debugger
-    }
-
-    console.log(`returning week`, week)
-
     return week
 }
 
@@ -78,3 +61,5 @@ for(let i = 0; i < weeksNeeded; i++) {
 }
 
 console.log(leagueSchedule.flat())
+
+console.log(matchUps.every(matchup => leagueSchedule.flat().some(scheduledMatchup => isSameMatch(matchup, scheduledMatchup))))
