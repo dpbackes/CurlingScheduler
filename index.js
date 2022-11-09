@@ -1,4 +1,4 @@
-const numberOfTeams  = 13
+const numberOfTeams  = 9 
 const numberOfSheets = 6
 
 const teamsArray = Array(numberOfTeams).fill().map((_, index) => index + 1) 
@@ -19,7 +19,7 @@ const matchUps = [].concat(...teamsArray.map(
 // the numer of teams (each team plays a matchup every week) or the number
 // of sheets available to play matches on
 
-const matchesPerWeek = Math.min(Math.ceil(numberOfTeams / 2), numberOfSheets)
+const matchesPerWeek = teamsArray.length / 2
 const weeksNeeded    = matchUps.length / matchesPerWeek
 
 const isSameMatch = (matchA, matchB) => matchA.teams.every(team => matchB.teams.includes(team))
@@ -36,14 +36,16 @@ const createWeek = (playedMatches, allPossibleMatches, matchesPerWeek) => {
     const week = []
 
     while(week.length < matchesPerWeek) {
-        const candidateMatch = availableMatchesThisWeek.find(match => !weekHasTeamPlaying(week, match))
-        const firstMatch = week[0]
+        let candidateMatch = availableMatchesThisWeek.find(match => !weekHasTeamPlaying(week, match))
+        const rejectedMatches = []
 
-        if (!candidateMatch) {
-            week.shift()
-            const secondCandidateMatch = availableMatchesThisWeek.find(match => !weekHasTeamPlaying(week, match) && !isSameMatch(match, firstMatch))
-            week.push(secondCandidateMatch)
-            continue
+        while (!candidateMatch) {
+            console.log(`looking for a different candiddate ${week.length}, ${availableMatchesThisWeek.length}, ${rejectedMatches.length}`)
+            rejectedMatches.push(week.shift())
+            candidateMatch = availableMatchesThisWeek.find(match => !weekHasTeamPlaying(week, match) && !rejectedMatches.some(rejectedMatch => isSameMatch(match, rejectedMatch)))
+            if (candidateMatch) {
+                rejectedMatches.length = 0
+            }
         }
 
         week.push(candidateMatch)
@@ -52,17 +54,40 @@ const createWeek = (playedMatches, allPossibleMatches, matchesPerWeek) => {
     return week
 }
 
-const leagueSchedule = []
+const schedule = new Array(weeksNeeded).fill([])
 
-for(let i = 0; i < weeksNeeded; i++) {
-    leagueSchedule.push(createWeek(leagueSchedule.flat(), matchUps, matchesPerWeek))
-}
+const rrSchedule = schedule.map((week, weekIndex) => {
+    week.length = teamsArray.length / 2
+    week.fill({})
 
-const isScheduleComplete = matchUps.every(matchup => leagueSchedule.flat().some(scheduledMatchup => isSameMatch(matchup, scheduledMatchup)))
+    const teamsForWeek = [].concat(teamsArray)
+    const pivotTeam = teamsForWeek.shift()
+    const rotatedTeams = arrayRotate(teamsForWeek, weekIndex)
+
+    return week.map((_, matchIndex) => {
+        const firstTeam = matchIndex === 0 ? pivotTeam : rotatedTeams[matchIndex - 1]
+        const secondTeam = rotatedTeams[rotatedTeams.length - 1 - matchIndex]
+
+        return { teams: [firstTeam, secondTeam]}
+    })
+})
+
+console.log(rrSchedule)
+
+//console.log(matchUps.map(matchup => `${(matchup.teams[1] - matchup.teams[0])}`))
+//console.log(matchUps)
+
+//const leagueSchedule = []
+//
+//for(let i = 0; i < weeksNeeded; i++) {
+//    leagueSchedule.push(createWeek(leagueSchedule.flat(), matchUps, matchesPerWeek))
+//}
+//
+const isScheduleComplete = matchUps.every(matchup => rrSchedule.flat().some(scheduledMatchup => isSameMatch(matchup, scheduledMatchup)))
 
 if (!isScheduleComplete) {
     console.log("Schedule is not complete! Not all round robin matchups have been scheduled!")
     process.exit(1)
 }
 
-leagueSchedule.forEach((week, weekNumber) => console.log(`On week ${weekNumber + 1} the matchups are ${JSON.stringify(week)}`))
+rrSchedule.forEach((week, weekNumber) => console.log(`On week ${weekNumber + 1} the matchups are ${JSON.stringify(week)}`))
