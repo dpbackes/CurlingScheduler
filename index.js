@@ -63,10 +63,24 @@ if (!isScheduleComplete) {
 
 rrSchedule.forEach((week, weekNumber) => console.log(`On week ${weekNumber + 1} the matchups are ${JSON.stringify(week)}`))
 
+const fitnessForSheet = (sheetMatchups) => {
+    const flatTeams = [].concat(...sheetMatchups.map(matchup => matchup.teams))
+    const teamOccurenceCounts = flatTeams.reduce((occurenceObject, element) => {
+        occurenceObject[element] = ++occurenceObject[element] || 1
+        return occurenceObject
+    }, {})
+    const occurenceArray = Object.values(teamOccurenceCounts)
+
+
+    return occurenceArray.map(value => value * value).reduce((currentSum, value) => currentSum + value, 0)
+}
+
 const fitness = (schedule) => {
     const sortedSchedule = schedule.map(week => week.sort(sortByeToEnd))
     const transposed = sortedSchedule[0].map((_, i) => sortedSchedule.map(row => row[i]))
-    console.dir(transposed, {depth: null})
+
+    const weeklyFitness = transposed.map(fitnessForSheet)
+    console.dir(weeklyFitness, {depth: null})
 }
 
 fitness(rrSchedule)
