@@ -80,7 +80,9 @@ const fitness = (schedule) => {
     const matchesBySheet = sortedSchedule[0].map((_, i) => sortedSchedule.map(row => row[i])).filter(sheet => !sheet.some(matchup => matchup.teams.includes(BYE)))
 
     const weeklyFitness = matchesBySheet.map(fitnessForSheet) // weekly fitness now contains an array of each sheet's fitness score ie [ 78, 42, 42, 42 ]
-    console.dir(weeklyFitness, {depth: null})
+
+    return weeklyFitness
 }
 
-fitness(rrSchedule)
+console.dir(fitness(rrSchedule), {depth: null})
+console.dir(fitness(rrSchedule.map(week => week.sort(() => Math.random() - .5))), {depth: null})
