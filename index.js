@@ -1,10 +1,11 @@
+const BYE            = 'BYE'
 const numberOfTeams  = 9 
 const numberOfSheets = 6
 
 const teamsArray = Array(numberOfTeams).fill().map((_, index) => index + 1) 
 
 if ( numberOfTeams % 2 === 1) {
-  teamsArray.push('BYE')
+  teamsArray.push(BYE)
 }
 
 const allNecessaryMatchups = [].concat(...teamsArray.map( 
@@ -19,6 +20,23 @@ const matchHasAnySameTeam = (matchA, matchB) => matchA.teams.some(team => matchB
 const weekHasTeamPlaying = (week, match) => week.some(matchInWeek => matchHasAnySameTeam(match, matchInWeek))
 
 const arrayRotate = (array, count) => array.slice(count, array.length).concat(array.slice(0, count))
+
+const sortByeToEnd = (matchA, matchB) => {
+    const aHasBye = matchA.teams.includes(BYE)
+    const bHasBye = matchB.teams.includes(BYE)
+
+    if (aHasBye === bHasBye) {
+        return 0
+    }
+
+    if (aHasBye) { 
+        return 1
+    }
+
+    if (bHasBye) { 
+        return -1
+    }
+}
 
 const rrSchedule = new Array(weeksNeeded).fill([]).map((week, weekIndex) => {
     week.length = teamsArray.length / 2
@@ -45,11 +63,10 @@ if (!isScheduleComplete) {
 
 rrSchedule.forEach((week, weekNumber) => console.log(`On week ${weekNumber + 1} the matchups are ${JSON.stringify(week)}`))
 
-
 const fitness = (schedule) => {
-    const transposed = schedule[0].map((_, i) => schedule.map(row => row[i]))
-    const mapped = transposed.map(sheet => sheet.
-    console.log(transposed)
+    const sortedSchedule = schedule.map(week => week.sort(sortByeToEnd))
+    const transposed = sortedSchedule[0].map((_, i) => sortedSchedule.map(row => row[i]))
+    console.dir(transposed, {depth: null})
 }
 
 fitness(rrSchedule)
