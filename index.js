@@ -77,9 +77,9 @@ const fitnessForSheet = (sheetMatchups) => {
 
 const fitness = (schedule) => {
     const sortedSchedule = schedule.map(week => week.sort(sortByeToEnd))
-    const transposed = sortedSchedule[0].map((_, i) => sortedSchedule.map(row => row[i]))
+    const matchesBySheet = sortedSchedule[0].map((_, i) => sortedSchedule.map(row => row[i])).filter(sheet => !sheet.some(matchup => matchup.teams.includes(BYE)))
 
-    const weeklyFitness = transposed.map(fitnessForSheet)
+    const weeklyFitness = matchesBySheet.map(fitnessForSheet)
     console.dir(weeklyFitness, {depth: null})
 }
 
