@@ -93,5 +93,28 @@ function shuffleArray(array) {
 
     return shuffled
 }
+
+const mutate = (schedule) => {
+    return schedule.map(week => shuffleArray(week))
+}
+
+const crossover = (scheduleA, scheduleB) => {
+    if (scheduleA.length !== scheduleB.length) {
+        throw 'Schedules must be same length in order to do crossover'
+    }
+
+    const crossoverWeek = Math.floor(Math.random() * scheduleA.length)
+
+    const crossoverA = scheduleA
+    const crossoverB = scheduleB
+
+    crossoverA[crossoverWeek] = scheduleB[crossoverWeek]
+    crossoverB[crossoverWeek] = scheduleA[crossoverWeek]
+
+    return [crossoverA, crossoverB]
+}
+
+
+
 console.dir(fitness(rrSchedule), {depth: null})
 console.dir(fitness(rrSchedule.map(week => shuffleArray(week))), {depth: null})
