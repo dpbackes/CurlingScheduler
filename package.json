@@ -4,5 +4,8 @@
   "description": "A quick and easy curling league scheduler",
   "main": "index.js",
   "author": "Dan Backes",
-  "license": "MIT"
+  "license": "MIT",
+  "dependencies": {
+    "geneticalgorithm": "^1.0.2"
+  }
 }
