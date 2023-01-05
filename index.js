@@ -1,7 +1,7 @@
 var GeneticAlgorithmConstructor = require('geneticalgorithm')
 
 const BYE            = 'BYE'
-const numberOfTeams  = 9 
+const numberOfTeams  = 9
 const numberOfSheets = 6
 
 const teamsArray = Array(numberOfTeams).fill().map((_, index) => index + 1) 
@@ -92,6 +92,20 @@ const fitness = (schedule) => {
     return -1 * totalFitness
 }
 
+const doesABeatB = (scheduleA, scheduleB) => {
+    if (scheduleA.length !== scheduleB.length) {
+        throw 'schedules must be the same length to compare'
+    }
+
+    const numberOfDifference = scheduleA.reduce((result, currentWeek, weekIndex) => result + (currentWeek.reduce((weekResult, matchInA, matchIndex) => weekResult + isSameMatch(matchInA, scheduleB[weekIndex][matchIndex]), 0)), 0)
+
+    if (numberOfDifference > 30) {
+        return false
+    }
+
+    return fitness(scheduleA) >= fitness(scheduleB)
+}
+
 function shuffleArray(array) {
     const shuffled = [].concat(array)
     for (let i = shuffled.length - 1; i > 0; i--) {
@@ -126,13 +140,14 @@ var config = {
     mutationFunction: mutate,
     crossoverFunction: crossover,
     fitnessFunction: fitness,
+    doesABeatBFunction: doesABeatB,
     population: [ rrSchedule, mutate(rrSchedule), mutate(rrSchedule) ],
-    populationSize: 100
+    populationSize: 10000
 }
 
 var geneticalgorithm = GeneticAlgorithmConstructor(config)
 
-for(let i = 0; i < 1000; i++) {
+for(let i = 0; i < 500; i++) {
     geneticalgorithm.evolve()
 }
 const best = geneticalgorithm.best()
@@ -141,4 +156,3 @@ console.dir(best, {depth: null})
 console.dir(sortMatchesBySheet(best), {depth: null})
 console.dir(fitness(best), {depth: null})
 console.log(allNecessaryMatchups.every(matchup => best.flat().some(scheduledMatchup => isSameMatch(matchup, scheduledMatchup))))
-
