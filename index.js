@@ -1,3 +1,5 @@
+var GeneticAlgorithmConstructor = require('geneticalgorithm')
+
 const BYE            = 'BYE'
 const numberOfTeams  = 9 
 const numberOfSheets = 6
@@ -75,13 +77,19 @@ const fitnessForSheet = (sheetMatchups) => {
     return occurenceArray.map(value => value * value).reduce((currentSum, value) => currentSum + value, 0)
 }
 
+const sortMatchesBySheet = (schedule) => {
+    return schedule[0].map((_, i) => schedule.map(row => row[i])).filter(sheet => !sheet.some(matchup => matchup.teams.includes(BYE)))
+}
+
 const fitness = (schedule) => {
     const sortedSchedule = schedule.map(week => week.sort(sortByeToEnd))
-    const matchesBySheet = sortedSchedule[0].map((_, i) => sortedSchedule.map(row => row[i])).filter(sheet => !sheet.some(matchup => matchup.teams.includes(BYE)))
+    const matchesBySheet = sortMatchesBySheet(sortedSchedule)
 
     const weeklyFitness = matchesBySheet.map(fitnessForSheet) // weekly fitness now contains an array of each sheet's fitness score ie [ 78, 42, 42, 42 ]
 
-    return weeklyFitness
+    const totalFitness = weeklyFitness.reduce((sum, current) => sum + current, 0)
+
+    return -1 * totalFitness
 }
 
 function shuffleArray(array) {
@@ -114,7 +122,23 @@ const crossover = (scheduleA, scheduleB) => {
     return [crossoverA, crossoverB]
 }
 
+var config = {
+    mutationFunction: mutate,
+    crossoverFunction: crossover,
+    fitnessFunction: fitness,
+    population: [ rrSchedule, mutate(rrSchedule), mutate(rrSchedule) ],
+    populationSize: 100
+}
 
+var geneticalgorithm = GeneticAlgorithmConstructor(config)
 
-console.dir(fitness(rrSchedule), {depth: null})
-console.dir(fitness(rrSchedule.map(week => shuffleArray(week))), {depth: null})
+for(let i = 0; i < 1000; i++) {
+    geneticalgorithm.evolve()
+}
+const best = geneticalgorithm.best()
+
+console.dir(best, {depth: null})
+console.dir(sortMatchesBySheet(best), {depth: null})
+console.dir(fitness(best), {depth: null})
+console.log(allNecessaryMatchups.every(matchup => best.flat().some(scheduledMatchup => isSameMatch(matchup, scheduledMatchup))))
+
